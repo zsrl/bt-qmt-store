@@ -2,7 +2,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import time
 from collections import deque
 from datetime import datetime
 
@@ -47,33 +46,20 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def start(self, ):
         DataBase.start(self)
 
-        start_time = self._format_datetime(self.p.fromdate)
-        end_time = self._format_datetime(self.p.todate)
-
         if not self.p.live:
             if self.p.timeframe == bt.TimeFrame.Days:
-                res = self.store._fetch_history(symbol=self.p.dataname, period='1d', start_time=start_time, end_time=end_time)
-                time = res['time'].iloc[0].values
-                open = res['open'].iloc[0].values
-                high = res['high'].iloc[0].values
-                low = res['low'].iloc[0].values
-                close = res['close'].iloc[0].values
-                volume = res['volume'].iloc[0].values
-
-                result = np.column_stack((time, open, high, low, close, volume))
-                for item in result:
-                    self._data.append(item)
+                self._append_date(period='1d')
             elif self.p.timeframe == bt.TimeFrame.Minutes:
-                res = self.store._fetch_history(symbol=self.p.dataname, period='1m', start_time=start_time, end_time=end_time)
+                self._append_date(period='1m')
             elif self.p.timeframe == bt.TimeFrame.Ticks:
-                res = self.store._fetch_history(symbol=self.p.dataname, period='tick', start_time=self.p.fromdate, end_time=self.p.todate)
+                self._append_date(period='tick')
                 pass
 
     def _load(self):
         if len(self._data):
             current = self._data.popleft()
 
-            dtime = datetime.utcfromtimestamp(current[0] // 1000)
+            dtime = datetime.fromtimestamp(current[0] // 1000)
 
             self.lines.datetime[0] = bt.date2num(dtime)
             self.lines.open[0] = current[1]
@@ -87,9 +73,38 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def islive(self):
         return self.p.live
     
-    def _format_datetime(self, dt):
+    def _format_datetime(self, dt, period=bt.TimeFrame.Days):
         if dt is None:
             return ''
         else:
-            formatted_string = dt.strftime("%Y%m%d")
+            if period == bt.TimeFrame.Days:
+                formatted_string = dt.strftime("%Y%m%d")
+            else:
+                formatted_string = dt.strftime("%Y%m%d%H%M%S")
             return formatted_string
+        
+    def _append_date(self, period):
+
+        start_time = self._format_datetime(self.p.fromdate)
+        end_time = self._format_datetime(self.p.todate)
+
+        res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, end_time=end_time)
+        if period is not 'tick':
+            time = res['time'].iloc[0].values
+            open = res['open'].iloc[0].values
+            high = res['high'].iloc[0].values
+            low = res['low'].iloc[0].values
+            close = res['close'].iloc[0].values
+            volume = res['volume'].iloc[0].values
+        else:
+            res_arr = res[self.p.dataname]
+            time = [item[0] for item in res_arr]
+            open = [item[2] for item in res_arr]
+            high = [item[3] for item in res_arr]
+            low = [item[4] for item in res_arr]
+            close = [item[1] for item in res_arr]
+            volume = [item[7] for item in res_arr]
+
+        result = np.column_stack((time, open, high, low, close, volume))
+        for item in result:
+            self._data.append(item)
