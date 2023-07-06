@@ -42,18 +42,28 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def __init__(self, **kwargs):
         self.store = self._store(**kwargs)
         self._data = deque()  # data queue for price data
+        self._seq = None
 
     def start(self, ):
         DataBase.start(self)
 
+        period_map = {
+            bt.TimeFrame.Days: '1d',
+            bt.TimeFrame.Minutes: '1m',
+            bt.TimeFrame.Ticks: 'tick'
+        } 
+
         if not self.p.live:
-            if self.p.timeframe == bt.TimeFrame.Days:
-                self._append_date(period='1d')
-            elif self.p.timeframe == bt.TimeFrame.Minutes:
-                self._append_date(period='1m')
-            elif self.p.timeframe == bt.TimeFrame.Ticks:
-                self._append_date(period='tick')
-                pass
+            self._history_data(period=period_map[self.p.timeframe])
+        else:
+            pass
+
+    def stop(self):
+        DataBase.stop(self)
+
+        if self.p.live:
+            self.store._unsubscribe_live(self._seq)
+
 
     def _load(self):
         if len(self._data):
@@ -69,6 +79,9 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             self.lines.volume[0] = current[5]
             return True
         return None
+    
+    def haslivedata(self):
+        return self.p.live and self._data
 
     def islive(self):
         return self.p.live
@@ -83,15 +96,15 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
                 formatted_string = dt.strftime("%Y%m%d%H%M%S")
             return formatted_string
         
-    def _append_date(self, period):
+    def _history_data(self, period):
 
         start_time = self._format_datetime(self.p.fromdate)
         end_time = self._format_datetime(self.p.todate)
 
         res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, end_time=end_time)
-        if period is not 'tick':
+        if period != 'tick':
             time = res['time'].iloc[0].values
-            open = res['open'].iloc[0].values
+            open = res['last'].iloc[0].values
             high = res['high'].iloc[0].values
             low = res['low'].iloc[0].values
             close = res['close'].iloc[0].values
@@ -99,12 +112,39 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         else:
             res_arr = res[self.p.dataname]
             time = [item[0] for item in res_arr]
-            open = [item[2] for item in res_arr]
-            high = [item[3] for item in res_arr]
-            low = [item[4] for item in res_arr]
+            open = [item[1] for item in res_arr]
+            high = [item[1] for item in res_arr]
+            low = [item[1] for item in res_arr]
             close = [item[1] for item in res_arr]
             volume = [item[7] for item in res_arr]
 
         result = np.column_stack((time, open, high, low, close, volume))
         for item in result:
             self._data.append(item)
+
+    def _live_data(self, period):
+
+        def on_data(datas):
+            res = datas[self.p.dataname]
+
+            if period != 'tick':
+                self._data.append({
+                    'time': res['time'],
+                    'open': res['open'],
+                    'high': res['high'],
+                    'low': res['low'],
+                    'close': res['close'],
+                    'volume': res['volume'],
+                })
+            else:
+                self._data.append({
+                    'time': res['time'],
+                    'open': res['lastPrice'],
+                    'high': res['lastPrice'],
+                    'low': res['lastPrice'],
+                    'close': res['lastPrice'],
+                    'volume': res['volume'],
+                })
+
+
+        self._seq = self.store._subscribe_live(symbol=self.p.dataname, period=period, callback=on_data)

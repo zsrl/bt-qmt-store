@@ -61,3 +61,10 @@ class QMTStore(object, metaclass=MetaSingleton):
         xtdata.download_history_data2(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time)
         df = xtdata.get_market_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time)
         return df
+    
+    def _subscribe_live(self, symbol, period, callback):
+
+        return xtdata.subscribe_quote(stock_code=symbol, period=period, count=0, callback=callback)
+    
+    def _unsubscribe_live(self, seq):
+        xtdata.unsubscribe_quote(seq)
