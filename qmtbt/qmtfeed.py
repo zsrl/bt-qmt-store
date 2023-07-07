@@ -56,7 +56,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         if not self.p.live:
             self._history_data(period=period_map[self.p.timeframe])
         else:
-            pass
+            self._live_data(period=period_map[self.p.timeframe])
 
     def stop(self):
         DataBase.stop(self)
@@ -125,26 +125,13 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def _live_data(self, period):
 
         def on_data(datas):
-            res = datas[self.p.dataname]
+            res = datas[self.p.dataname][0]
+            print(res)
 
             if period != 'tick':
-                self._data.append({
-                    'time': res['time'],
-                    'open': res['open'],
-                    'high': res['high'],
-                    'low': res['low'],
-                    'close': res['close'],
-                    'volume': res['volume'],
-                })
+                self._data.append([res['time'], res['open'], res['high'], res['low'], res['close'], res['volume']])
             else:
-                self._data.append({
-                    'time': res['time'],
-                    'open': res['lastPrice'],
-                    'high': res['lastPrice'],
-                    'low': res['lastPrice'],
-                    'close': res['lastPrice'],
-                    'volume': res['volume'],
-                })
+                self._data.append([res['time'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['volume']])
 
 
         self._seq = self.store._subscribe_live(symbol=self.p.dataname, period=period, callback=on_data)
