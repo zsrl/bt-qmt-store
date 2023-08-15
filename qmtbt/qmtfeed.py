@@ -9,6 +9,7 @@ import numpy as np
 
 import backtrader as bt
 from backtrader.feed import DataBase
+import pandas as pd
 
 from .qmtstore import QMTStore
 
@@ -28,6 +29,8 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     Params:
       - ``historical`` (default: ``False``)
     """
+
+    lines = ('askPrice', 'bidPrice',)
 
     params = (
         ('live', False),  # only historical download
@@ -68,6 +71,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def _load(self):
         if len(self._data):
             current = self._data.popleft()
+            print(current)
 
             dtime = datetime.fromtimestamp(current[0] // 1000)
 
@@ -77,6 +81,9 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             self.lines.low[0] = current[3]
             self.lines.close[0] = current[4]
             self.lines.volume[0] = current[5]
+            if self.p.timeframe == bt.TimeFrame.Ticks:
+                self.lines.askPrice[0] = current[6][0]
+                self.lines.bidPrice[0] = current[7][0]
             return True
         return None
     
@@ -102,23 +109,29 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         end_time = self._format_datetime(self.p.todate)
 
         res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, end_time=end_time)
+        print(res)
         if period != 'tick':
             time = res['time'].iloc[0].values
-            open = res['last'].iloc[0].values
+            open = res['open'].iloc[0].values
             high = res['high'].iloc[0].values
             low = res['low'].iloc[0].values
             close = res['close'].iloc[0].values
             volume = res['volume'].iloc[0].values
         else:
-            res_arr = res[self.p.dataname]
-            time = [item[0] for item in res_arr]
-            open = [item[1] for item in res_arr]
-            high = [item[1] for item in res_arr]
-            low = [item[1] for item in res_arr]
-            close = [item[1] for item in res_arr]
-            volume = [item[7] for item in res_arr]
+            res = pd.DataFrame(res[self.p.dataname])
+            time = res['time'].iloc[0].values
+            open = res['open'].iloc[0].values
+            high = res['high'].iloc[0].values
+            low = res['low'].iloc[0].values
+            close = res['close'].iloc[0].values
+            volume = res['volume'].iloc[0].values
 
-        result = np.column_stack((time, open, high, low, close, volume))
+        if period != 'tick':
+            result = np.column_stack((time, open, high, low, close, volume))
+        else:
+            askPrice = res['askPrice'].iloc[0].values
+            bidPrice = res['bidPrice'].iloc[0].values
+            result = np.column_stack((time, open, high, low, close, volume, askPrice, bidPrice))
         for item in result:
             self._data.append(item)
 
@@ -131,7 +144,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             if period != 'tick':
                 self._data.append([res['time'], res['open'], res['high'], res['low'], res['close'], res['volume']])
             else:
-                self._data.append([res['time'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['volume']])
+                self._data.append([res['time'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['volume'], res['askPrice'], res['bidPrice']])
 
 
         self._seq = self.store._subscribe_live(symbol=self.p.dataname, period=period, callback=on_data)
