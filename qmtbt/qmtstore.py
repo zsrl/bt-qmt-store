@@ -93,7 +93,20 @@ class QMTStore(object, metaclass=MetaSingleton):
     
     def _subscribe_live(self, symbol, period, callback):
 
-        return xtdata.subscribe_quote(stock_code=symbol, period=period, count=0, callback=callback)
+        def on_data(datas):
+            res = datas[symbol][0]
+            if period != 'tick':
+                for key in res:
+                    res[key] = res[key].iloc[0].values
+
+                res = pd.DataFrame(res)
+            else:
+                res = pd.DataFrame([res])
+                res = self._auto_expand_array_columns(res)
+                print(res, 'res')
+            callback(res)
+
+        return xtdata.subscribe_quote(stock_code=symbol, period=period, count=0, callback=on_data)
     
     def _unsubscribe_live(self, seq):
         xtdata.unsubscribe_quote(seq)

@@ -30,10 +30,11 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
       - ``historical`` (default: ``False``)
     """
 
-    lines = ('askPrice', 'bidPrice',)
+    lines = ('lastClose', 'amount', 'pvolume', 'stockStatus', 'openInt', 'lastSettlementPrice', 'settlementPrice', 'transactionNum', 'askPrice1', 'askPrice2', 'askPrice3', 'askPrice4', 'askPrice5', 'bidPrice1', 'bidPrice2', 'bidPrice3', 'bidPrice4', 'bidPrice5', 'askVol1', 'askVol2', 'askVol3', 'askVol4', 'askVol5', 'bidVol1', 'bidVol2', 'bidVol3', 'bidVol4', 'bidVol5', )
 
     params = (
         ('live', False),  # only historical download
+        ('timeframe', bt.TimeFrame.Ticks)
     )
 
     _store = QMTStore
@@ -43,9 +44,17 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
 
     # def __init__(self, exchange, symbol, ohlcv_limit=None, config={}, retries=5):
     def __init__(self, **kwargs):
+        self._timeframe = self.p.timeframe
+        self._compression = 1
         self.store = self._store(**kwargs)
         self._data = deque()  # data queue for price data
         self._seq = None
+
+        # if self.p.timeframe == bt.TimeFrame.Ticks:
+        #     self.lines.extend(('time', 'lastPrice', 'open', 'high', 'low', 'lastClose', 'amount', 'volume', 'pvolume', 'stockStatus', 'openInt', 'lastSettlementPrice', 'settlementPrice', 'transactionNum', 'askPrice1', 'askPrice2', 'askPrice3', 'askPrice4', 'askPrice5', 'bidPrice1', 'bidPrice2', 'bidPrice3', 'bidPrice4', 'bidPrice5', 'askVol1', 'askVol2', 'askVol3', 'askVol4', 'askVol5', 'bidVol1', 'bidVol2', 'bidVol3', 'bidVol4', 'bidVol5'))
+        # else:
+        #     pass
+        #     # self.lines.extend(('extraColumn1', 'extraColumn2'))
 
     def start(self, ):
         DataBase.start(self)
@@ -69,21 +78,23 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
 
 
     def _load(self):
-        if len(self._data):
+        while len(self._data):
+
             current = self._data.popleft()
-            print(current)
 
-            dtime = datetime.fromtimestamp(current[0] // 1000)
-
-            self.lines.datetime[0] = bt.date2num(dtime)
-            self.lines.open[0] = current[1]
-            self.lines.high[0] = current[2]
-            self.lines.low[0] = current[3]
-            self.lines.close[0] = current[4]
-            self.lines.volume[0] = current[5]
-            if self.p.timeframe == bt.TimeFrame.Ticks:
-                self.lines.askPrice[0] = current[6][0]
-                self.lines.bidPrice[0] = current[7][0]
+            for key in current.keys():   
+                try: 
+                    value = current[key]
+                    if key == 'time':
+                        dtime = datetime.fromtimestamp(value // 1000)
+                        self.lines.datetime[0] = bt.date2num(dtime)
+                    elif key == 'lastPrice' and self.p.timeframe == bt.TimeFrame.Ticks:
+                        self.lines.close[0] = value
+                    else:
+                        attr = getattr(self.lines, key)
+                        attr[0] = value
+                except:
+                    pass
             return True
         return None
     
@@ -105,46 +116,18 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         
     def _history_data(self, period):
 
-        start_time = self._format_datetime(self.p.fromdate)
-        end_time = self._format_datetime(self.p.todate)
+        start_time = self._format_datetime(self.p.fromdate, period)
+        end_time = self._format_datetime(self.p.todate, period)
 
         res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, end_time=end_time)
-        print(res)
-        if period != 'tick':
-            time = res['time'].iloc[0].values
-            open = res['open'].iloc[0].values
-            high = res['high'].iloc[0].values
-            low = res['low'].iloc[0].values
-            close = res['close'].iloc[0].values
-            volume = res['volume'].iloc[0].values
-        else:
-            res = pd.DataFrame(res[self.p.dataname])
-            time = res['time'].iloc[0].values
-            open = res['open'].iloc[0].values
-            high = res['high'].iloc[0].values
-            low = res['low'].iloc[0].values
-            close = res['close'].iloc[0].values
-            volume = res['volume'].iloc[0].values
-
-        if period != 'tick':
-            result = np.column_stack((time, open, high, low, close, volume))
-        else:
-            askPrice = res['askPrice'].iloc[0].values
-            bidPrice = res['bidPrice'].iloc[0].values
-            result = np.column_stack((time, open, high, low, close, volume, askPrice, bidPrice))
+        result = res.to_dict('records')
         for item in result:
             self._data.append(item)
 
     def _live_data(self, period):
 
-        def on_data(datas):
-            res = datas[self.p.dataname][0]
-            print(res)
-
-            if period != 'tick':
-                self._data.append([res['time'], res['open'], res['high'], res['low'], res['close'], res['volume']])
-            else:
-                self._data.append([res['time'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['lastPrice'], res['volume'], res['askPrice'], res['bidPrice']])
+        def on_data(res):
+            self._data.append(res.iloc[0].to_dict())
 
 
         self._seq = self.store._subscribe_live(symbol=self.p.dataname, period=period, callback=on_data)
