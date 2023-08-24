@@ -77,9 +77,19 @@ class QMTStore(object, metaclass=MetaSingleton):
                 df = df.drop(col, axis=1).join(expanded_df)
         return df
 
-    def _fetch_history(self, symbol, period, start_time='', end_time=''):
-        xtdata.download_history_data2(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time)
-        res = xtdata.get_market_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time)
+    def _fetch_history(self, symbol, period, start_time='', end_time='', count=-1, dividend_type='none'):
+        """
+        获取历史数据
+        
+        参数：
+            symbol: 标的代码
+            period: 周期
+            start_time: 起始日期
+            end_time: 终止日期
+
+        """
+        xtdata.download_history_data(stock_code=symbol, period=period, start_time=start_time, end_time=end_time)
+        res = xtdata.get_market_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
         if period != 'tick':
             for key in res:
                 res[key] = res[key].iloc[0].values

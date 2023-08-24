@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 
 xtquant
-test.ipynb
+*.ipynb
 poetry.lock
