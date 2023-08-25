@@ -67,6 +67,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
 
         if not self.p.live:
             self._history_data(period=period_map[self.p.timeframe])
+            print(f'{self.p.dataname}历史数据装载成功！')
         else:
             self._live_data(period=period_map[self.p.timeframe])
 

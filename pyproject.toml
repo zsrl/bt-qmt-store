@@ -1,13 +1,12 @@
 [tool.poetry]
-name = "bt-qmt-store"
+name = "qmtbt"
 version = "0.1.0"
 description = ""
 authors = ["pluto <mayuanchi1029@gmail.com>"]
 readme = "README.md"
-packages = [{include = "bt_qmt_store"}]
 
 [tool.poetry.dependencies]
-python = "3.8.10"
+python = "^3.8"
 backtrader = "^1.9.78.123"
 pandas = "^2.0.2"
 
