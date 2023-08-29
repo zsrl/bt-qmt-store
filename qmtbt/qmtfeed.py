@@ -4,12 +4,8 @@ from __future__ import (absolute_import, division, print_function,
 
 from collections import deque
 from datetime import datetime
-
-import numpy as np
-
 import backtrader as bt
 from backtrader.feed import DataBase
-import pandas as pd
 
 from .qmtstore import QMTStore
 
@@ -39,22 +35,12 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
 
     _store = QMTStore
 
-    # States for the Finite State Machine in _load
-    _ST_LIVE, _ST_HISTORBACK, _ST_OVER = range(3)
-
-    # def __init__(self, exchange, symbol, ohlcv_limit=None, config={}, retries=5):
     def __init__(self, **kwargs):
         self._timeframe = self.p.timeframe
         self._compression = 1
         self.store = self._store(**kwargs)
         self._data = deque()  # data queue for price data
         self._seq = None
-
-        # if self.p.timeframe == bt.TimeFrame.Ticks:
-        #     self.lines.extend(('time', 'lastPrice', 'open', 'high', 'low', 'lastClose', 'amount', 'volume', 'pvolume', 'stockStatus', 'openInt', 'lastSettlementPrice', 'settlementPrice', 'transactionNum', 'askPrice1', 'askPrice2', 'askPrice3', 'askPrice4', 'askPrice5', 'bidPrice1', 'bidPrice2', 'bidPrice3', 'bidPrice4', 'bidPrice5', 'askVol1', 'askVol2', 'askVol3', 'askVol4', 'askVol5', 'bidVol1', 'bidVol2', 'bidVol3', 'bidVol4', 'bidVol5'))
-        # else:
-        #     pass
-        #     # self.lines.extend(('extraColumn1', 'extraColumn2'))
 
     def start(self, ):
         DataBase.start(self)
@@ -105,11 +91,11 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def islive(self):
         return self.p.live
     
-    def _format_datetime(self, dt, period=bt.TimeFrame.Days):
+    def _format_datetime(self, dt, period='1d'):
         if dt is None:
             return ''
         else:
-            if period == bt.TimeFrame.Days:
+            if period == '1d':
                 formatted_string = dt.strftime("%Y%m%d")
             else:
                 formatted_string = dt.strftime("%Y%m%d%H%M%S")

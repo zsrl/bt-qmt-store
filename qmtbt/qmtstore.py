@@ -90,14 +90,9 @@ class QMTStore(object, metaclass=MetaSingleton):
         """
         if download:
             xtdata.download_history_data(stock_code=symbol, period=period, start_time=start_time, end_time=end_time)
-        res = xtdata.get_market_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
-        if period != 'tick':
-            for key in res:
-                res[key] = res[key].iloc[0].values
-
-            res = pd.DataFrame(res)
-        else:
-            res = pd.DataFrame(res[symbol])
+        res = xtdata.get_local_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
+        res = res[symbol]
+        if period == 'tick':
             res = self._auto_expand_array_columns(res)
         
         return res
