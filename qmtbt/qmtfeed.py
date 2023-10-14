@@ -33,12 +33,10 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         ('timeframe', bt.TimeFrame.Ticks)
     )
 
-    _store = QMTStore
-
     def __init__(self, **kwargs):
         self._timeframe = self.p.timeframe
         self._compression = 1
-        self.store = self._store(**kwargs)
+        self.store = kwargs['store']
         self._data = deque()  # data queue for price data
         self._seq = None
 
@@ -55,14 +53,15 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             self._history_data(period=period_map[self.p.timeframe])
             print(f'{self.p.dataname}历史数据装载成功！')
         else:
-            self._live_data(period=period_map[self.p.timeframe])
+            self._history_data(period=period_map[self.p.timeframe])
+            print(f'{self.p.dataname}实时数据装载成功！')
+            # self._live_data(period=period_map[self.p.timeframe])
 
     def stop(self):
         DataBase.stop(self)
 
         if self.p.live:
             self.store._unsubscribe_live(self._seq)
-
 
     def _load(self):
         while len(self._data):
@@ -100,7 +99,10 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             else:
                 formatted_string = dt.strftime("%Y%m%d%H%M%S")
             return formatted_string
-        
+
+    def _append_data(self, item):
+        self._data.append(item)    
+    
     def _history_data(self, period):
 
         start_time = self._format_datetime(self.p.fromdate, period)
@@ -109,7 +111,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, end_time=end_time)
         result = res.to_dict('records')
         for item in result:
-            self._data.append(item)
+            self._data.append(item)  
 
     def _live_data(self, period):
 

@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.8"
 backtrader = "^1.9.78.123"
 pandas = "^2.0.2"
+schedule = "^1.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
