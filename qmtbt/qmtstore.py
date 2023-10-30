@@ -63,6 +63,9 @@ class QMTStore(object, metaclass=MetaSingleton):
         self.xtdata = xtdata
         self.xttrader = xttrader
         self.xttype = xttype
+        self.xt_trader = None
+    
+    def connect(self):
 
         session_id = int(random.randint(100000, 999999))
         xt_trader = self.xttrader.XtQuantTrader(self.mini_qmt_path, session_id)
@@ -70,16 +73,15 @@ class QMTStore(object, metaclass=MetaSingleton):
         xt_trader.start()
 
         connect_result = xt_trader.connect()
-        print(connect_result, 'connect_result')
 
         if connect_result == 0:
             print('连接成功')
 
-        self.stock_account = self.xttype.StockAccount(account)
+            self.stock_account = self.xttype.StockAccount(self.account)
 
-        xt_trader.subscribe(self.stock_account)
+            xt_trader.subscribe(self.stock_account)
 
-        self.xt_trader = xt_trader
+            self.xt_trader = xt_trader
 
     def _auto_expand_array_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """

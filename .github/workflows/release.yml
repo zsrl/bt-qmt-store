@@ -1,0 +1,38 @@
+name: Python package
+on:
+  push:
+    tags:
+      - "v*.*.*"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+          pip install auto-changelog
+
+      - name: Build and publish to PyPI
+        uses: JRubics/poetry-publish@v1.13
+        with:
+          ignore_dev_requirements: "yes"
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Changelog
+        uses: ardalanamini/auto-changelog@master
+        id  : changelog
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        env :
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body      : |
+            ${{ steps.changelog.outputs.changelog }}
+          prerelease: ${{ steps.changelog.outputs.prerelease }}
