@@ -39,13 +39,14 @@ class QMTStore(object, metaclass=MetaSingleton):
         '''Returns broker with *args, **kwargs from registered ``BrokerCls``'''
         return self.__class__.BrokerCls(*args, **kwargs)
     
-    def __init__(self, mini_qmt_path, xtquant_path, account):
+    def __init__(self, mini_qmt_path, xtquant_path, account, token=None):
 
         self.mini_qmt_path = mini_qmt_path
         self.xtquant_path = xtquant_path
         self.account = account
         self.code_list = []
         self.last_tick = None
+        self.token = token
 
         # 创建模块spec
         spec = importlib.util.spec_from_file_location('xtquant', f'{self.xtquant_path}\__init__.py')
@@ -67,6 +68,11 @@ class QMTStore(object, metaclass=MetaSingleton):
     
     def connect(self):
 
+        try:
+            self.xtdata.connect()
+        except:
+            return -1
+
         session_id = int(random.randint(100000, 999999))
         xt_trader = self.xttrader.XtQuantTrader(self.mini_qmt_path, session_id)
 
@@ -82,6 +88,8 @@ class QMTStore(object, metaclass=MetaSingleton):
             xt_trader.subscribe(self.stock_account)
 
             self.xt_trader = xt_trader
+        
+        return connect_result
 
     def _auto_expand_array_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
