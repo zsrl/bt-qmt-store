@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.1.4 (2024-07-14)
+
+### Fix
+
+* fix: 手动修改版本号 ([`02dc4f7`](https://github.com/zsrl/bt-qmt-store/commit/02dc4f74a98776fafd1d5c44e7c8f6512cdc6769))
+
+### Unknown
+
+* Merge pull request #4 from zsrl/develop
+
+fix: 手动修改版本号 ([`9e867e0`](https://github.com/zsrl/bt-qmt-store/commit/9e867e09c7467bc9a344c6a5df45cd696dbcba00))
+
 ## v0.1.3 (2024-07-14)
 
 ### Fix
