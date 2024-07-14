@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.1.3 (2024-07-14)
+
+### Fix
+
+* fix: 补充缺失步骤 ([`f4648aa`](https://github.com/zsrl/bt-qmt-store/commit/f4648aa2d47f912f8269397ff6d326e6247a67f1))
+
+### Unknown
+
+* Merge pull request #3 from zsrl/develop
+
+fix: 补充缺失步骤 ([`b2d0457`](https://github.com/zsrl/bt-qmt-store/commit/b2d0457ae4373fa38a822cc8acafde874252ac48))
+
 ## v0.1.2 (2024-07-14)
 
 ### Fix
