@@ -1,10 +1,24 @@
 # CHANGELOG
 
+## v0.2.1 (2024-07-14)
+
+### Unknown
+
+* Merge pull request #6 from zsrl/develop
+
+Develop ([`6aa368e`](https://github.com/zsrl/bt-qmt-store/commit/6aa368e15a00f674a7f8937c6220746dba97c211))
+
+* Merge remote-tracking branch &#39;origin/main&#39; into develop ([`6739c1e`](https://github.com/zsrl/bt-qmt-store/commit/6739c1e62b95abb9c99cbdc70b1dab63fdf0eabb))
+
 ## v0.2.0 (2024-07-14)
 
 ### Feature
 
 * feat: 增加文档 ([`7ed8e54`](https://github.com/zsrl/bt-qmt-store/commit/7ed8e54a187d12d1bf0a4a498254d9fa8a9ce2a3))
+
+### Performance
+
+* perf: 修改文档 ([`54a81a1`](https://github.com/zsrl/bt-qmt-store/commit/54a81a1f0801faca326a6212e663483ef0f9d837))
 
 ### Unknown
 
