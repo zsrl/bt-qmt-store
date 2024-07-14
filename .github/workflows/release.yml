@@ -24,6 +24,11 @@ jobs:
         with:
           python-version: '3.10'  # You can specify your required Python version here
 
+      - name: Install Poetry and Build
+        run: |
+          pip install poetry
+        shell: bash
+
       - name: Check release status
         id: release-status
         run: |
