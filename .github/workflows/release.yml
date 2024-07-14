@@ -1,38 +1,78 @@
 name: Python package
+
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  Test:
+    runs-on: windows-latest
+    permissions: write-all
+
+    env:
+      POETRY_HTTP_TIMEOUT: 600
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure full history for semantic-release
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'  # You can specify your required Python version here
 
-      - name: Install dependencies
+      - name: Install Poetry and Build
         run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
-          pip install auto-changelog
+          pip install poetry setuptools cython
+          python setup.py build_ext --inplace
+        shell: bash
 
-      - name: Build and publish to PyPI
-        uses: JRubics/poetry-publish@v1.13
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
         with:
-          ignore_dev_requirements: "yes"
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
+          python-version: '3.10'  # You can specify your required Python version here
 
-      - name: Changelog
-        uses: ardalanamini/auto-changelog@master
-        id  : changelog
+      - name: Check release status
+        id: release-status
+        run: |
+          pip install python-semantic-release
+          if semantic-release --noop --strict version; then
+            echo "::set-output name=released::true"
+          else
+            echo "::set-output name=released::false"
+          fi
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        env :
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          body      : |
-            ${{ steps.changelog.outputs.changelog }}
-          prerelease: ${{ steps.changelog.outputs.prerelease }}
+      - name: Semantic Release Version
+        if: steps.release-status.outputs.released == 'true'
+        run: |
+          semantic-release version
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Release to PyPI
+        if: steps.release-status.outputs.released == 'true'
+        run: |
+          poetry config pypi-token.pypi $PYPI_TOKEN
+          poetry publish --build
+        shell: bash
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Release to GitHub
+        if: steps.release-status.outputs.released == 'true'
+        run: |
+          git fetch --tags
+          for file in ./dist/*; do
+            gh release upload "${{ steps.release-status.outputs.tag }}" $file
+          done
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
