@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.2.2 (2024-07-14)
+
+### Fix
+
+* fix: 增加[tool.semantic_release] ([`fa3eca8`](https://github.com/zsrl/bt-qmt-store/commit/fa3eca816ac9ef724f45f176da2ec13bd7bcfc43))
+
+### Unknown
+
+* Merge pull request #7 from zsrl/develop
+
+fix: 增加[tool.semantic_release] ([`f5bb865`](https://github.com/zsrl/bt-qmt-store/commit/f5bb865cb8f03a9da270dde6fc116121f919f3d6))
+
 ## v0.2.1 (2024-07-14)
 
 ### Unknown
