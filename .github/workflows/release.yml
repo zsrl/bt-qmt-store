@@ -19,17 +19,6 @@ jobs:
         with:
           fetch-depth: 0  # Ensure full history for semantic-release
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'  # You can specify your required Python version here
-
-      - name: Install Poetry and Build
-        run: |
-          pip install poetry setuptools cython
-          python setup.py build_ext --inplace
-        shell: bash
-
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
