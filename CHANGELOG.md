@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.2.0 (2024-07-14)
+
+### Feature
+
+* feat: 增加文档 ([`7ed8e54`](https://github.com/zsrl/bt-qmt-store/commit/7ed8e54a187d12d1bf0a4a498254d9fa8a9ce2a3))
+
+### Unknown
+
+* Merge pull request #5 from zsrl/develop
+
+feat: 增加文档 ([`c3b2307`](https://github.com/zsrl/bt-qmt-store/commit/c3b2307f011ab1db2b1eee68f5492d211b5f2512))
+
 ## v0.1.4 (2024-07-14)
 
 ### Fix
