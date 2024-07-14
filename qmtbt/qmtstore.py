@@ -1,6 +1,5 @@
 import random
-import sys
-import importlib.util
+from xtquant import xtdata, xttrader, xttype
 
 import backtrader as bt
 from backtrader.metabase import MetaParams
@@ -39,42 +38,22 @@ class QMTStore(object, metaclass=MetaSingleton):
         '''Returns broker with *args, **kwargs from registered ``BrokerCls``'''
         return self.__class__.BrokerCls(*args, **kwargs)
     
-    def __init__(self, mini_qmt_path, xtquant_path, account, token=None):
+    def __init__(self):
 
-        self.mini_qmt_path = mini_qmt_path
-        self.xtquant_path = xtquant_path
-        self.account = account
+        self.mini_qmt_path = ''
         self.code_list = []
         self.last_tick = None
-        self.token = token
-
-        # 创建模块spec
-        spec = importlib.util.spec_from_file_location('xtquant', f'{self.xtquant_path}\__init__.py')
-
-        # 创建模块实例
-        module = importlib.util.module_from_spec(spec)
-
-        # 加载模块到当前Python环境
-        spec.loader.exec_module(module)
-
-        sys.modules['xtquant'] = module
-
-        from xtquant import xtdata, xttrader, xttype
-        
-        self.xtdata = xtdata
-        self.xttrader = xttrader
-        self.xttype = xttype
-        self.xt_trader = None
+        self.token = None
     
-    def connect(self):
+    def connect(self, mini_qmt_path, account):
 
         try:
-            self.xtdata.connect()
+            xtdata.connect()
         except:
             return -1
 
         session_id = int(random.randint(100000, 999999))
-        xt_trader = self.xttrader.XtQuantTrader(self.mini_qmt_path, session_id)
+        xt_trader = xttrader.XtQuantTrader(mini_qmt_path, session_id)
 
         xt_trader.start()
 
@@ -83,7 +62,7 @@ class QMTStore(object, metaclass=MetaSingleton):
         if connect_result == 0:
             print('连接成功')
 
-            self.stock_account = self.xttype.StockAccount(self.account)
+            self.stock_account = xttype.StockAccount(account)
 
             xt_trader.subscribe(self.stock_account)
 
@@ -122,8 +101,8 @@ class QMTStore(object, metaclass=MetaSingleton):
 
         """
         if download:
-            self.xtdata.download_history_data(stock_code=symbol, period=period, start_time=start_time, end_time=end_time)
-        res = self.xtdata.get_local_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
+            xtdata.download_history_data(stock_code=symbol, period=period, start_time=start_time, end_time=end_time)
+        res = xtdata.get_local_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
         res = res[symbol]
         if period == 'tick':
             res = self._auto_expand_array_columns(res)
