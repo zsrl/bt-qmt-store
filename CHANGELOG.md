@@ -1,10 +1,16 @@
 # CHANGELOG
 
+## v0.2.3 (2024-07-21)
+
+### Unknown
+
+* Merge pull request #8 from zsrl/develop
+
+Develop ([`726bf14`](https://github.com/zsrl/bt-qmt-store/commit/726bf1429d99a78a56762b78823579576a5bbc2b))
+
+* Merge remote-tracking branch &#39;origin/main&#39; into develop ([`dcca89f`](https://github.com/zsrl/bt-qmt-store/commit/dcca89ffdae7d59d38ce5cfe1d0caabe60e8e527))
+
 ## v0.2.2 (2024-07-14)
-
-### Fix
-
-* fix: 增加[tool.semantic_release] ([`fa3eca8`](https://github.com/zsrl/bt-qmt-store/commit/fa3eca816ac9ef724f45f176da2ec13bd7bcfc43))
 
 ### Unknown
 
@@ -13,6 +19,12 @@
 fix: 增加[tool.semantic_release] ([`f5bb865`](https://github.com/zsrl/bt-qmt-store/commit/f5bb865cb8f03a9da270dde6fc116121f919f3d6))
 
 ## v0.2.1 (2024-07-14)
+
+### Fix
+
+* fix: 删除pandas依赖 ([`e9fc4e5`](https://github.com/zsrl/bt-qmt-store/commit/e9fc4e5dcf14b69500bcd17462648b7ee1458473))
+
+* fix: 增加[tool.semantic_release] ([`fa3eca8`](https://github.com/zsrl/bt-qmt-store/commit/fa3eca816ac9ef724f45f176da2ec13bd7bcfc43))
 
 ### Unknown
 
