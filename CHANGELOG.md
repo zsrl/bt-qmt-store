@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.2.4 (2024-08-01)
+
+### Performance
+
+* perf: 更新文档 ([`abedd92`](https://github.com/zsrl/bt-qmt-store/commit/abedd92868018b8b0438c97a32b342872ba62f38))
+
+### Unknown
+
+* Merge pull request #9 from zsrl/develop
+
+perf: 更新文档 ([`6042dcd`](https://github.com/zsrl/bt-qmt-store/commit/6042dcd7f0df8cb26b5dafffc2868ad89643a4e7))
+
 ## v0.2.3 (2024-07-21)
 
 ### Unknown
