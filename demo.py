@@ -37,8 +37,10 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
 
     # 添加数据
-    data = store.getdata(dataname='600900.SH', timeframe=bt.TimeFrame.Days, fromdate=datetime(2022, 7, 1), dividend_type='front', live=True, cerebro=cerebro)
-    cerebro.adddata(data)
+    datas = store.getdatas(code_list=['600519.SH', '600000.SH'], timeframe=bt.TimeFrame.Days, fromdate=datetime(2022, 7, 1))
+
+    store.setdatas(datas)
+
 
     # 添加策略
     cerebro.addstrategy(DualMovingAverageStrategy)
