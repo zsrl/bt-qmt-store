@@ -43,20 +43,20 @@ if __name__ == '__main__':
 
 
     # 添加策略
-    cerebro.addstrategy(DualMovingAverageStrategy)
+    # cerebro.addstrategy(DualMovingAverageStrategy)
 
-    cerebro.optstrategy
+    # cerebro.optstrategy
 
-    # 设置初始资金
-    cerebro.broker.setcash(100000.0)
+    # # 设置初始资金
+    # cerebro.broker.setcash(100000.0)
 
-    # 设置佣金
-    cerebro.broker.setcommission(commission=0.001)
+    # # 设置佣金
+    # cerebro.broker.setcommission(commission=0.001)
 
-    # 运行回测
-    print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
-    cerebro.run()
-    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    # # 运行回测
+    # print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    # cerebro.run()
+    # print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
     # data.test(1)
     # data.test(2)
