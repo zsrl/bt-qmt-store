@@ -40,9 +40,12 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         self._timeframe = self.p.timeframe
         self._compression = 1
         self.store = kwargs['store']
-        self.cerebro = kwargs['cerebro']
+        # self.cerebro = kwargs['cerebro']
         self._data = deque()  # data queue for price data
         self._seq = None
+
+    # def __len__(self):
+    #     return len(self._data)
 
     def start(self, ):
         DataBase.start(self)

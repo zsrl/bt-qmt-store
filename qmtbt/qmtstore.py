@@ -1,6 +1,7 @@
 import random
 from xtquant import xtdata, xttrader, xttype
 from backtrader.metabase import MetaParams
+import backtrader as bt
 import pandas as pd
 
 
