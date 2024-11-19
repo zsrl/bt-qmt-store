@@ -4,21 +4,6 @@ from backtrader.utils.py3 import queue, with_metaclass
 import random
 from xtquant.xttrader import XtQuantTrader
 from xtquant.xttype import StockAccount
-
-# miniQMT安装路径
-mini_qmt_path = r'D:\国金证券QMT交易端\userdata_mini'
-# 创建session_id
-session_id = int(random.randint(100000, 999999))
-# 创建交易对象
-xt_trader = XtQuantTrader(mini_qmt_path, session_id)
-# 启动交易对象
-xt_trader.start()
-# 连接客户端
-connect_result = xt_trader.connect()
-
-if connect_result == 0:
-    print('连接成功')
-
 from .qmtstore import QMTStore
 
 class QMTOrder(OrderBase):

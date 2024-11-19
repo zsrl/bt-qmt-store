@@ -15,7 +15,7 @@ from qmtbt import QMTStore
 
 cerebro = bt.Cerebro()
 
-store = QmtStore()
+store = QMTStore()
 
 data = store.getdata(dataname='600115.SH', timeframe=bt.TimeFrame.Days, fromdate=datetime(2022, 1, 1), todate=datetime(2023, 9, 6), dividend_type='front')
 cerebro.adddata(data)

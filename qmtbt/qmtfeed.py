@@ -134,16 +134,17 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         start_time = self._format_datetime(self.p.fromdate, period)
 
         def on_data(res):
-            current = res[self.p.dataname][0]
-            if self._get_datetime(current['time']) == self.lines.datetime[0]:
-                self._load_current(current)
-            else:
-                self._data.append(current)
+            print(self.lines.datetime)
+            # current = res[self.p.dataname][0]
+            # if self._get_datetime(current['time']) == self.lines.datetime[0]:
+            #     self._load_current(current)
+            # else:
+            #     self._data.append(current)
 
 
         self._seq = self.store._subscribe_live(symbol=self.p.dataname, period=period, start_time=start_time, callback=on_data)
 
-        res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time)
+        res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, download=False)
         result = res.to_dict('records')
         for item in result:
             self._data.append(item)
