@@ -29,7 +29,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
       - ``historical`` (default: ``False``)
     """
 
-    lines = ('lastClose', 'amount', 'pvolume', 'stockStatus', 'openInt', 'lastSettlementPrice', 'settlementPrice', 'transactionNum', 'askPrice1', 'askPrice2', 'askPrice3', 'askPrice4', 'askPrice5', 'bidPrice1', 'bidPrice2', 'bidPrice3', 'bidPrice4', 'bidPrice5', 'askVol1', 'askVol2', 'askVol3', 'askVol4', 'askVol5', 'bidVol1', 'bidVol2', 'bidVol3', 'bidVol4', 'bidVol5', 'openInterest', 'dr', 'totaldr', 'preClose', 'suspendFlag', 'settelementPrice' )
+    lines = ('lastClose', 'amount', 'pvolume', 'stockStatus', 'openInt', 'lastSettlementPrice', 'settlementPrice', 'transactionNum', 'askPrice1', 'askPrice2', 'askPrice3', 'askPrice4', 'askPrice5', 'bidPrice1', 'bidPrice2', 'bidPrice3', 'bidPrice4', 'bidPrice5', 'askVol1', 'askVol2', 'askVol3', 'askVol4', 'askVol5', 'bidVol1', 'bidVol2', 'bidVol3', 'bidVol4', 'bidVol5', 'openInterest', 'dr', 'totaldr', 'preClose', 'suspendFlag', 'settelementPrice', 'pe' )
 
     params = (
         ('live', False),  # only historical download
@@ -53,7 +53,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         period_map = {
             bt.TimeFrame.Days: '1d',
             bt.TimeFrame.Minutes: '1m',
-            # bt.TimeFrame.Ticks: 'tick'
+            bt.TimeFrame.Ticks: 'tick'
         } 
 
         if not self.p.live:
@@ -127,7 +127,8 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, end_time=end_time)
         result = res.to_dict('records')
         for item in result:
-            self._data.append(item)  
+            if item.get('close') != 0 and item.get('lastPrice') != 0:
+                self._data.append(item)
 
     def _live_data(self, period):
 

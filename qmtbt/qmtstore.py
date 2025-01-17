@@ -111,8 +111,8 @@ class QMTStore(object, metaclass=MetaSingleton):
             xtdata.download_history_data(stock_code=symbol, period=period, start_time=start_time, end_time=end_time)
         res = xtdata.get_market_data_ex(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
         res = res[symbol]
-        # if period == 'tick':
-        #     res = self._auto_expand_array_columns(res)
+        if period == 'tick':
+            res = self._auto_expand_array_columns(res)
         return res
     
     def _subscribe_live(self, symbol, period, callback, start_time='', end_time=''):
