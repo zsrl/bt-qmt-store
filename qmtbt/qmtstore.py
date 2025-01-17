@@ -1,9 +1,7 @@
 import random
 from xtquant import xtdata, xttrader, xttype
-
-import backtrader as bt
 from backtrader.metabase import MetaParams
-
+import backtrader as bt
 import pandas as pd
 
 
@@ -24,15 +22,20 @@ class MetaSingleton(MetaParams):
 
 class QMTStore(object, metaclass=MetaSingleton):
     
-    def getdata(self, *args, **kwargs):
+    def getdata(self, *args, **kwargs): 
         '''Returns ``DataCls`` with args, kwargs'''
         kwargs['store'] = self
         qmtFeed = self.__class__.DataCls(*args, **kwargs)
-        self.code_list.append({
-            **kwargs,
-            'feed': qmtFeed
-        })
         return qmtFeed
+    
+    def getdatas(self, *args, **kwargs):
+        '''Returns ``DataCls`` with *args, **kwargs (multiple entries)'''
+        return [self.getdata(*args, **{**kwargs, 'dataname': stock}) for stock in kwargs.pop('code_list', 1)]
+    
+    def setdatas(self, cerebro, datas):
+        '''Set the datas'''
+        for data in datas:
+            cerebro.adddata(data)
 
     def getbroker(self, *args, **kwargs):
         '''Returns broker with *args, **kwargs from registered ``BrokerCls``'''
@@ -44,6 +47,10 @@ class QMTStore(object, metaclass=MetaSingleton):
         self.code_list = []
         self.last_tick = None
         self.token = None
+
+    def _get_benchmark(self):
+        xtdata.download_history_data(stock_code='000300.SH', period='1d', start_time='2022-01-01', end_time='2023-01-01', dividend_type='none')
+        pass
     
     def connect(self, mini_qmt_path, account):
 
@@ -102,24 +109,18 @@ class QMTStore(object, metaclass=MetaSingleton):
         """
         if download:
             xtdata.download_history_data(stock_code=symbol, period=period, start_time=start_time, end_time=end_time)
-        res = xtdata.get_local_data(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
+        res = xtdata.get_market_data_ex(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
         res = res[symbol]
         if period == 'tick':
             res = self._auto_expand_array_columns(res)
         return res
     
-    def subscribe_live(self):
+    def _subscribe_live(self, symbol, period, callback, start_time='', end_time=''):
 
-        def on_data(datas):
-             for item in self.code_list:
-                 data = datas[item['dataname']]
-                #  if data is not None:
-                    #  print(data, 'data')
-                    #  item.feed._append_data(data)
-             self.last_tick = datas
-            # callback(datas)
+        seq = xtdata.subscribe_quote(stock_code=symbol, period=period, start_time=start_time, end_time=end_time, callback=callback)
 
-        return self.xtdata.subscribe_whole_quote(code_list=[item['dataname'] for item in self.code_list], callback=on_data)
+        return seq
+
     
-    def unsubscribe_live(self, seq):
-        self.xtdata.unsubscribe_quote(seq)
+    def _unsubscribe_live(self, seq):
+        xtdata.unsubscribe_quote(seq)
